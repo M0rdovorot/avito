@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres
+    container_name: avito-banners-postgres-1
+    environment:
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_USER: "banners"
+      POSTGRES_DB: "banners"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5432:5432"
+    volumes: 
+      - ./:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banners -d banners"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+  redis:
+    image: redis:latest
+    container_name: avito-banners-redis-1
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=12345
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
+  avito.banners:
+    image: m0rdovorot/avito.banners:latest
+    ports:
+      - "8001:8001"
